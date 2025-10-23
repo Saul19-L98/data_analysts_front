@@ -12,7 +12,8 @@ interface LineVizProps {
 export function LineViz({ chart }: LineVizProps) {
   const { chart_data, x_axis_key, y_axis_keys } = chart
 
-  const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']
+  // Use vibrant colors for better visibility in dark mode
+  const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']
 
   // Build chart config for tooltip
   const chartConfig: ChartConfig = {}
@@ -55,15 +56,15 @@ export function LineViz({ chart }: LineVizProps) {
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chart_data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           <XAxis
             dataKey={x_axis_key || 'name'}
-            stroke="hsl(var(--muted-foreground))"
+            tick={{ fill: 'rgba(255,255,255,0.7)' }}
             fontSize={12}
           />
-          <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+          <YAxis tick={{ fill: 'rgba(255,255,255,0.7)' }} fontSize={12} />
           <Tooltip content={<ChartTooltipContent />} />
-          <Legend />
+          <Legend wrapperStyle={{ color: '#fff' }} />
         {y_axis_keys && y_axis_keys.length > 0 ? (
           y_axis_keys.map((key, index) => (
             <Line

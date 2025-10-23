@@ -17,21 +17,24 @@ export function HistogramViz({ chart }: HistogramVizProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={chart_data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
         <XAxis
           dataKey={x_axis_key || 'bin'}
-          stroke="hsl(var(--muted-foreground))"
+          tick={{ fill: 'rgba(255,255,255,0.7)' }}
           fontSize={12}
         />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+        <YAxis tick={{ fill: 'rgba(255,255,255,0.7)' }} fontSize={12} />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'hsl(var(--popover))',
-            border: '1px solid hsl(var(--border))',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '6px',
+            color: '#fff',
           }}
+          itemStyle={{ color: '#fff' }}
+          labelStyle={{ color: '#fff' }}
         />
-        <Bar dataKey={frequencyKey} fill="hsl(var(--chart-1))" />
+        <Bar dataKey={frequencyKey} fill="#8b5cf6" />
       </BarChart>
     </ResponsiveContainer>
   )

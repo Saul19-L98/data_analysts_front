@@ -11,6 +11,7 @@ import {
   ScatterChart as ScatterChartIcon,
   TrendingUp,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface SelectionViewProps {
   workspaceId: string
@@ -179,19 +180,20 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
       )}
 
       <div className="flex gap-4">
-        <button
+        <Button
           onClick={handleBack}
           disabled={isLoading}
-          className="px-6 py-3 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          variant="secondary"
+          className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={handleCreateDashboard}
           disabled={selected.size === 0 || isLoading}
-          className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="flex-1"
           aria-busy={isLoading}
         >
           {isLoading ? (
@@ -207,7 +209,7 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
               </span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   )

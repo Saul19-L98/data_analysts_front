@@ -11,7 +11,8 @@ interface BarVizProps {
 export function BarViz({ chart }: BarVizProps) {
   const { chart_data, x_axis_key, y_axis_keys } = chart
 
-  const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']
+  // Use vibrant colors for better visibility in dark mode
+  const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']
 
   // Check if data is a placeholder/metadata structure
   const hasPlaceholderData = chart_data.length > 0 && 'note' in chart_data[0] && chart_data[0].note === 'Data structure placeholder'
@@ -44,21 +45,24 @@ export function BarViz({ chart }: BarVizProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={chart_data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
         <XAxis
           dataKey={x_axis_key || 'name'}
-          stroke="hsl(var(--muted-foreground))"
+          tick={{ fill: 'rgba(255,255,255,0.7)' }}
           fontSize={12}
         />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+        <YAxis tick={{ fill: 'rgba(255,255,255,0.7)' }} fontSize={12} />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'hsl(var(--popover))',
-            border: '1px solid hsl(var(--border))',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '6px',
+            color: '#fff',
           }}
+          itemStyle={{ color: '#fff' }}
+          labelStyle={{ color: '#fff' }}
         />
-        <Legend />
+        <Legend wrapperStyle={{ color: '#fff' }} />
         {y_axis_keys && y_axis_keys.length > 0 ? (
           y_axis_keys.map((key, index) => (
             <Bar key={key} dataKey={key} fill={colors[index % colors.length]} />

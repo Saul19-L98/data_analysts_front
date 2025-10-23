@@ -6,11 +6,11 @@ interface DonutVizProps {
 }
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  '#8b5cf6',  // Purple
+  '#10b981',  // Green
+  '#f59e0b',  // Amber
+  '#ef4444',  // Red
+  '#3b82f6',  // Blue
 ]
 
 /**
@@ -37,7 +37,7 @@ export function DonutViz({ chart }: DonutVizProps) {
           }}
           outerRadius={100}
           innerRadius={60}
-          fill="hsl(var(--chart-1))"
+          fill="#8884d8"
           dataKey={valueKey}
           nameKey={nameKey}
         >
@@ -47,12 +47,15 @@ export function DonutViz({ chart }: DonutVizProps) {
         </Pie>
         <Tooltip
           contentStyle={{
-            backgroundColor: 'hsl(var(--popover))',
-            border: '1px solid hsl(var(--border))',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '6px',
+            color: '#fff',
           }}
+          itemStyle={{ color: '#fff' }}
+          labelStyle={{ color: '#fff' }}
         />
-        <Legend />
+        <Legend wrapperStyle={{ color: '#fff' }} />
       </PieChart>
     </ResponsiveContainer>
   )

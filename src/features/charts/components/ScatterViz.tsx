@@ -14,28 +14,31 @@ export function ScatterViz({ chart }: ScatterVizProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <ScatterChart>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
         <XAxis
           dataKey={x_axis_key || 'x'}
-          stroke="hsl(var(--muted-foreground))"
+          tick={{ fill: 'rgba(255,255,255,0.7)' }}
           fontSize={12}
         />
         <YAxis
           dataKey={y_axis_keys?.[0] || 'y'}
-          stroke="hsl(var(--muted-foreground))"
+          tick={{ fill: 'rgba(255,255,255,0.7)' }}
           fontSize={12}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'hsl(var(--popover))',
-            border: '1px solid hsl(var(--border))',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '6px',
+            color: '#fff',
           }}
+          itemStyle={{ color: '#fff' }}
+          labelStyle={{ color: '#fff' }}
           cursor={{ strokeDasharray: '3 3' }}
         />
         <Scatter
           data={chart_data}
-          fill="hsl(var(--chart-1))"
+          fill="#8b5cf6"
         />
       </ScatterChart>
     </ResponsiveContainer>

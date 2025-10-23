@@ -1,8 +1,12 @@
 import { useState } from 'react'
-import { Upload, Sparkles } from 'lucide-react'
+import { Upload, Sparkles, FileSpreadsheet } from 'lucide-react'
 import { useWorkspaceStore } from '../stores/useWorkspaceStore'
 import { ingestData } from '@/services/api'
 import type { ApiError } from '@/types'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 interface PromptViewProps {
   workspaceId: string
@@ -17,6 +21,32 @@ export function PromptView({ workspaceId }: PromptViewProps) {
   const [file, setFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      const selectedFile = files[0]
+      if (selectedFile.name.endsWith('.csv') || selectedFile.name.endsWith('.xlsx')) {
+        setFile(selectedFile)
+        setError(null)
+      } else {
+        setError('Solo se permiten archivos CSV y XLSX')
+      }
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -70,92 +100,136 @@ export function PromptView({ workspaceId }: PromptViewProps) {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-full p-8">
-      <div className="w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">
+    <div className="flex min-h-full items-center justify-center p-6">
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Header */}
+        <div className="space-y-3 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+            <Sparkles className="h-4 w-4" />
+            <span>Análisis con IA</span>
+          </div>
+          <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground">
             Analiza tus datos con IA
-          </h2>
-          <p className="text-muted-foreground">
+          </h1>
+          <p className="text-pretty text-lg text-muted-foreground">
             Describe qué quieres visualizar y sube tu archivo de datos
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="message"
-              className="block text-sm font-medium text-foreground mb-2"
-            >
-              Descripción
-            </label>
-            <textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Describe tus datos o lo que quieres ver..."
-              className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              rows={4}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="file"
-              className="block text-sm font-medium text-foreground mb-2"
-            >
-              Archivo de datos
-            </label>
-            <div className="relative">
-              <input
-                id="file"
-                type="file"
-                accept=".csv,.xlsx"
-                onChange={handleFileChange}
-                className="hidden"
-                disabled={isLoading}
-              />
-              <label
-                htmlFor="file"
-                className="flex items-center justify-center gap-2 w-full px-4 py-8 bg-background border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary transition-colors"
-              >
-                <Upload className="w-6 h-6 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  {file ? file.name : 'Selecciona un archivo CSV o XLSX'}
-                </span>
+        {/* Form */}
+        <Card className="border-border bg-card p-8 shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Description Field */}
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium text-card-foreground">
+                Descripción
               </label>
+              <Textarea
+                id="description"
+                placeholder="Describe tus datos o lo que quieres ver..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                disabled={isLoading}
+                className="min-h-[120px] resize-none bg-background text-foreground placeholder:text-muted-foreground"
+              />
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Solo se aceptan archivos CSV y XLSX
-            </p>
-          </div>
 
-          {error && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-sm text-destructive">{error}</p>
+            {/* File Upload */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-card-foreground">Archivo de datos</label>
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={cn(
+                  "relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all",
+                  isDragging
+                    ? "border-primary bg-primary/5"
+                    : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50",
+                  isLoading && "cursor-not-allowed opacity-50"
+                )}
+              >
+                <input
+                  type="file"
+                  accept=".csv,.xlsx"
+                  onChange={handleFileChange}
+                  disabled={isLoading}
+                  className="absolute inset-0 cursor-pointer opacity-0"
+                />
+
+                {file ? (
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="rounded-full bg-primary/10 p-4">
+                      <FileSpreadsheet className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">{file.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {(file.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setFile(null)
+                      }}
+                      className="text-muted-foreground hover:text-foreground"
+                      disabled={isLoading}
+                    >
+                      Cambiar archivo
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <div className="rounded-full bg-muted p-4">
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        Selecciona un archivo CSV o XLSX
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        o arrastra y suelta aquí
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Solo se aceptan archivos CSV y XLSX</p>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={isLoading || !message.trim() || !file}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            aria-busy={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                <span>Procesando con IA...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                <span className="font-medium">Analizar con IA</span>
-              </>
+            {/* Error Message */}
+            {error && (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
             )}
-          </button>
-        </form>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isLoading || !message.trim() || !file}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              aria-busy={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+                  <span>Procesando con IA...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  <span>Analizar con IA</span>
+                </>
+              )}
+            </Button>
+          </form>
+        </Card>
       </div>
     </div>
   )

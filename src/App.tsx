@@ -1,7 +1,11 @@
 import { useEffect } from 'react'
-import { Sidebar } from '@/features/workspaces/components/Sidebar'
+import { AppSidebar } from '@/components/app-sidebar'
+import { SiteHeader } from '@/components/site-header'
 import { WorkspaceContent } from '@/features/workspaces/components/WorkspaceContent'
 import { validateEnv } from '@/lib/env'
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { ThemeProvider } from '@/components/theme-provider'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 function App() {
   useEffect(() => {
@@ -17,12 +21,26 @@ function App() {
   }, [])
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 overflow-hidden">
-        <WorkspaceContent />
-      </main>
-    </div>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <TooltipProvider>
+        <SidebarProvider
+          style={
+            {
+              '--sidebar-width': 'calc(var(--spacing) * 72)',
+              '--header-height': 'calc(var(--spacing) * 12)',
+            } as React.CSSProperties
+          }
+        >
+          <AppSidebar />
+          <SidebarInset>
+            <SiteHeader />
+            <div className="flex flex-1 flex-col h-[calc(100vh-3rem)]">
+              <WorkspaceContent />
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   )
 }
 

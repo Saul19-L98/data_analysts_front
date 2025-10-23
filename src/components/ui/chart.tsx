@@ -54,8 +54,15 @@ export function ChartTooltipContent({ active, payload, label }: ChartTooltipCont
   }
 
   return (
-    <div className="rounded-lg border bg-popover px-3 py-2 text-sm shadow-md">
-      {label && <div className="font-medium mb-1">{label}</div>}
+    <div 
+      className="rounded-lg border px-3 py-2 text-sm shadow-md"
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        color: '#fff'
+      }}
+    >
+      {label && <div className="font-medium mb-1" style={{ color: '#fff' }}>{label}</div>}
       <div className="space-y-1">
         {payload.map((item, index) => {
           const key = item.dataKey
@@ -68,10 +75,10 @@ export function ChartTooltipContent({ active, payload, label }: ChartTooltipCont
                   style={{ backgroundColor: itemConfig.color }}
                 />
               )}
-              <span className="text-muted-foreground">
+              <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                 {itemConfig?.label || key}:
               </span>
-              <span className="font-medium">{item.value}</span>
+              <span className="font-medium" style={{ color: '#fff' }}>{item.value}</span>
             </div>
           )
         })}
