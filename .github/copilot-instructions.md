@@ -192,6 +192,145 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 
 ---
 
+## Zustand State Management Best Practices
+
+### Installation and Setup
+- **Install Zustand**: `pnpm add zustand`
+- **Small, fast, and scalable** - no boilerplate, no providers needed
+- **Hooks-based API** - use stores as hooks anywhere in your app
+
+### Store Creation with TypeScript
+- **Always use TypeScript for type safety**
+- **Use the curried syntax** for proper type inference: `create<T>()(...)` (note the double parentheses)
+- **Define interfaces for your state**:
+  ```typescript
+  interface BearState {
+    bears: number
+    increase: (by: number) => void
+  }
+  
+  const useBearStore = create<BearState>()((set) => ({
+    bears: 0,
+    increase: (by) => set((state) => ({ bears: state.bears + by })),
+  }))
+  ```
+
+### Store Structure
+- **Group related state and actions together** in the same store
+- **Keep stores focused** - separate concerns into different stores when needed
+- **Name stores with 'use' prefix**: `useBearStore`, `useUserStore`, `useCartStore`
+- **Put state properties first, then actions**
+
+### State Updates
+- **State is immutable** - use the `set` function to update
+- **The `set` function merges state at one level**: `set((state) => ({ count: state.count + 1 }))`
+- **For nested objects, merge explicitly**:
+  ```typescript
+  set((state) => ({
+    nested: { ...state.nested, count: state.nested.count + 1 }
+  }))
+  ```
+- **Use the replace flag** to replace entire state: `set(newState, true)`
+
+### Selecting State in Components
+- **Use selectors to prevent unnecessary re-renders**:
+  ```typescript
+  const bears = useBearStore((state) => state.bears)
+  const increase = useBearStore((state) => state.increase)
+  ```
+- **Only select what you need** - components re-render only when selected state changes
+- **Extract complex selectors** into separate functions for reusability
+
+### Auto-Generated Selectors (Optional)
+- **Create a helper function** to auto-generate selectors for convenience:
+  ```typescript
+  const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(_store: S) => {
+    const store = _store as WithSelectors<typeof _store>
+    store.use = {}
+    for (const k of Object.keys(store.getState())) {
+      (store.use as any)[k] = () => store((s) => s[k as keyof typeof s])
+    }
+    return store
+  }
+  
+  // Usage
+  const useBearStore = createSelectors(useBearStoreBase)
+  const bears = useBearStore.use.bears()
+  ```
+
+### Middleware Usage
+- **Use `devtools` for debugging** in development:
+  ```typescript
+  import { devtools } from 'zustand/middleware'
+  
+  const useStore = create<State>()(
+    devtools((set) => ({
+      // your state
+    }))
+  )
+  ```
+- **Use `persist` for localStorage/sessionStorage**:
+  ```typescript
+  import { persist } from 'zustand/middleware'
+  
+  const useStore = create<State>()(
+    persist(
+      (set) => ({
+        // your state
+      }),
+      { name: 'my-store' }
+    )
+  )
+  ```
+- **Middleware order matters**: Use `devtools` last - `devtools(persist(...))`
+- **Available middleware**: `devtools`, `persist`, `immer`, `subscribeWithSelector`, `redux`, `combine`
+
+### Slices Pattern (for large stores)
+- **Split large stores into slices** for better organization:
+  ```typescript
+  interface BearSlice {
+    bears: number
+    addBear: () => void
+  }
+  
+  interface FishSlice {
+    fishes: number
+    addFish: () => void
+  }
+  
+  const createBearSlice: StateCreator<BearSlice & FishSlice, [], [], BearSlice> = (set) => ({
+    bears: 0,
+    addBear: () => set((state) => ({ bears: state.bears + 1 })),
+  })
+  
+  const createFishSlice: StateCreator<BearSlice & FishSlice, [], [], FishSlice> = (set) => ({
+    fishes: 0,
+    addFish: () => set((state) => ({ fishes: state.fishes + 1 })),
+  })
+  
+  const useBoundStore = create<BearSlice & FishSlice>()((...a) => ({
+    ...createBearSlice(...a),
+    ...createFishSlice(...a),
+  }))
+  ```
+
+### Best Practices
+- **No providers needed** - just import and use the hook anywhere
+- **Stores are singletons** - state is shared across all components using the same store
+- **Avoid zombie child problems** - Zustand handles React concurrency correctly
+- **Use TypeScript strictly** - leverage type inference and explicit types
+- **Keep actions simple** - complex logic can be extracted into separate functions
+- **Test stores independently** - stores are vanilla JS objects that can be tested without React
+- **Use shallow comparison** for selecting multiple values: `import { shallow } from 'zustand/shallow'`
+
+### Performance Tips
+- **Select only what you need** - granular selections prevent unnecessary re-renders
+- **Avoid selecting entire store**: Use `const { bears, fish } = useStore()` sparingly
+- **Memoize complex selectors** with separate functions
+- **Use `subscribeWithSelector` middleware** for selective subscriptions
+
+---
+
 ## General Best Practices
 
 ### Code Style
