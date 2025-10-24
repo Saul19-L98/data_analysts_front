@@ -78,25 +78,55 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
     updateWorkspaceStatus(workspaceId, 'building')
 
     try {
-      const transformRequest = {
-        session_id: workspace?.sessionId || '',
-        suggested_charts: selectedCharts,
-        dataset: workspace?.dataset || [],
+      console.log('🔵 Starting transform process for', selectedCharts.length, 'charts')
+      console.log('📋 Chart titles:', selectedCharts.map(c => c.title))
+      
+      const allTransformedCharts = []
+
+      // Call transform endpoint once for each chart
+      for (let i = 0; i < selectedCharts.length; i++) {
+        const chart = selectedCharts[i]
+        
+        console.log(`\n� [${i + 1}/${selectedCharts.length}] Transforming chart: "${chart.title}"`)
+        
+        const transformRequest = {
+          session_id: workspace?.sessionId || '',
+          suggested_charts: [chart], // Send only ONE chart at a time
+          dataset: workspace?.dataset || [],
+        }
+        
+        console.log('🔍 Request:', JSON.stringify(transformRequest, null, 2))
+        
+        const response = await transformCharts(transformRequest)
+        
+        console.log(`✅ [${i + 1}/${selectedCharts.length}] Response received:`, response.charts.length, 'chart(s)')
+        
+        // Add all charts from response to our collection
+        if (response.charts && response.charts.length > 0) {
+          allTransformedCharts.push(...response.charts)
+        } else {
+          console.warn(`⚠️ Chart "${chart.title}" returned no data`)
+        }
       }
       
-      console.log('🔵 Transform Request:', JSON.stringify(transformRequest, null, 2))
+      console.log('\n🎉 All transforms complete!')
+      console.log('📊 Total charts transformed:', allTransformedCharts.length, '/', selectedCharts.length)
       
-      const response = await transformCharts(transformRequest)
-      
-      console.log('🟢 Transform Response:', JSON.stringify(response, null, 2))
-      console.log('📊 Charts received:', response.charts.length)
-      
-      // Log first chart data structure
-      if (response.charts.length > 0) {
-        console.log('📈 First chart data sample:', response.charts[0].chart_data.slice(0, 2))
+      // Check if we got all expected charts
+      if (allTransformedCharts.length === 0) {
+        setError('No se pudo transformar ninguna gráfica')
+        updateWorkspaceStatus(workspaceId, 'empty')
+        return
       }
       
-      setWorkspaceCharts(workspaceId, response.charts)
+      if (allTransformedCharts.length < selectedCharts.length) {
+        console.warn(`⚠️ Some charts failed to transform`)
+        setError(
+          `Solo se transformaron ${allTransformedCharts.length} de ${selectedCharts.length} gráficas seleccionadas`
+        )
+      }
+      
+      setWorkspaceCharts(workspaceId, allTransformedCharts)
     } catch (err) {
       const apiError = err as ApiError
       console.error('🔴 Transform Error:', apiError)
@@ -110,7 +140,7 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
   }
 
   return (
-    <div className="h-full flex flex-col p-8">
+    <div className="h-full flex flex-col !p-8">
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-foreground mb-2">
           Selecciona tus visualizaciones
@@ -120,7 +150,7 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto mb-6">
+      <div className="flex-1 overflow-y-auto mb-6 !mt-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {suggestedCharts.map((chart, index) => (
             <button

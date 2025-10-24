@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Upload, Sparkles, FileSpreadsheet, AlertCircle } from 'lucide-react'
+import { Upload, Sparkles, FileSpreadsheet, AlertCircle, X } from 'lucide-react'
 import { useWorkspaceStore } from '../stores/useWorkspaceStore'
 import { ingestData } from '@/services/api'
 import type { ApiError } from '@/types'
@@ -117,7 +117,7 @@ export function PromptView({ workspaceId }: PromptViewProps) {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center p-6">
+    <div className="flex min-h-full items-center justify-center !p-6">
       <div className="w-full max-w-2xl space-y-8">
         {/* Header */}
         <div className="space-y-3 text-center">
@@ -175,7 +175,21 @@ export function PromptView({ workspaceId }: PromptViewProps) {
                 />
 
                 {file ? (
-                  <div className="flex flex-col items-center gap-3 text-center">
+                  <div className="relative flex flex-col items-center gap-3 text-center p-4">
+                    {/* X button in top right corner */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setFile(null)
+                      }}
+                      disabled={isLoading}
+                      className="absolute top-2 right-2 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Eliminar archivo"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+
                     <div className="rounded-full bg-primary/10 p-4">
                       <FileSpreadsheet className="h-8 w-8 text-primary" />
                     </div>
@@ -185,19 +199,6 @@ export function PromptView({ workspaceId }: PromptViewProps) {
                         {(file.size / 1024).toFixed(2)} KB
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setFile(null)
-                      }}
-                      className="text-muted-foreground hover:text-foreground"
-                      disabled={isLoading}
-                    >
-                      Cambiar archivo
-                    </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-3 text-center">
