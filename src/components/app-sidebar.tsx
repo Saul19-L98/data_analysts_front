@@ -23,7 +23,7 @@ const data = {
 
 export function AppSidebar() {
   return (
-    <Sidebar variant="inset" collapsible="icon" className="border-r border-border !p-2">
+    <Sidebar variant="inset" collapsible="icon" className="border-r border-border !p-4">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

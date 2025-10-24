@@ -39,7 +39,7 @@ function App() {
             <AppSidebar />
             <SidebarInset className="h-screen overflow-hidden">
               <SiteHeader />
-              <div className="flex-1 min-h-0 px-2 md:px-4 lg:px-16 md:mb-16">
+              <div className="flex-1 min-h-0 !px-2 md:!px-4 lg:!px-16">
                 <WorkspaceContent />
               </div>
             </SidebarInset>

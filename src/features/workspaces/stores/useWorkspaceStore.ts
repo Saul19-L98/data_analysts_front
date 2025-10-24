@@ -176,9 +176,9 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
     }),
     {
       name: 'data-helper-workspaces',
+      // Persist all workspaces regardless of status
       partialize: (state) => ({
-        // Only persist workspaces with status 'ready' (built dashboards)
-        workspaces: state.workspaces.filter((w) => w.status === 'ready'),
+        workspaces: state.workspaces,
         activeWorkspaceId: state.activeWorkspaceId,
       }),
     }
