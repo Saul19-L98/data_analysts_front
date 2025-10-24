@@ -118,7 +118,7 @@ export function NavWorkspaces() {
                   >
                     <button
                       title="Editar"
-                      className="p-1.5 hover:bg-sidebar-accent rounded-md bg-sidebar shadow-sm border border-sidebar-border"
+                      className="p-1.5 hover:bg-sidebar-accent rounded-md bg-sidebar shadow-sm border border-sidebar-border cursor-pointer"
                       onClick={(e) => handleEdit(workspace.id, workspace.name, e)}
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -127,7 +127,7 @@ export function NavWorkspaces() {
 
                     <button
                       title="Eliminar"
-                      className="p-1.5 hover:bg-sidebar-accent rounded-md bg-sidebar shadow-sm border border-sidebar-border"
+                      className="p-1.5 hover:bg-sidebar-accent rounded-md bg-sidebar shadow-sm border border-sidebar-border cursor-pointer"
                       onClick={(e) => handleDelete(workspace.id, workspace.name, e)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />

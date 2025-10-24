@@ -38,7 +38,11 @@ export function WorkspaceContent() {
       return <SelectionView workspaceId={workspace.id} />
 
     case 'ready':
-      return <DashboardView workspaceId={workspace.id} />
+      return (
+        <div className="h-full overflow-hidden !px-16">
+          <DashboardView workspaceId={workspace.id} />
+        </div>
+      )
 
     default:
       return (

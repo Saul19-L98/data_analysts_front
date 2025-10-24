@@ -24,6 +24,7 @@ function App() {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <TooltipProvider>
         <SidebarProvider
+          className="h-screen"
           style={
             {
               '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -32,9 +33,9 @@ function App() {
           }
         >
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="h-screen overflow-hidden">
             <SiteHeader />
-            <div className="flex flex-1 flex-col h-[calc(100vh-3rem)]">
+            <div className="flex-1 min-h-0">
               <WorkspaceContent />
             </div>
           </SidebarInset>
