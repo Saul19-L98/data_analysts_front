@@ -39,7 +39,7 @@ export function WorkspaceContent() {
 
     case 'ready':
       return (
-        <div className="h-full overflow-hidden !px-16">
+        <div className="h-full overflow-hidden ">
           <DashboardView workspaceId={workspace.id} />
         </div>
       )

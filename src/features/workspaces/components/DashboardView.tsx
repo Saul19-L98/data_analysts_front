@@ -52,7 +52,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
       {/* Fixed Header Section */}
       <div className="shrink-0 space-y-6 md:space-y-8 py-6 md:py-8 px-6 lg:px-8">
         {/* Dashboard Header */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 !my-4">
           <h2 className="text-3xl font-bold tracking-tight">
             {workspace?.name || 'Dashboard'}
           </h2>
@@ -62,7 +62,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
         </div>
 
         {/* Stats Overview */}
-        <div>
+        <div className='!my-4'>
           <StatsCards
             totalCharts={charts.length}
             totalWorkspaces={workspaces.length}
@@ -72,7 +72,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
       </div>
 
       {/* Scrollable Charts Section */}
-      <div className="flex-1 overflow-y-auto px-6 lg:px-8 pb-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 lg:px-8 pb-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {charts.map((chart) => (
             <Card key={chart.id} className="flex flex-col col-span-2 lg:col-span-3">
