@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, ArrowLeft, Sparkles } from 'lucide-react'
+import { Check, ArrowLeft, Sparkles, AlertCircle } from 'lucide-react'
 import { useWorkspaceStore } from '../stores/useWorkspaceStore'
 import { transformCharts } from '@/services/api'
 import type { ApiError } from '@/types'
@@ -12,6 +12,7 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface SelectionViewProps {
   workspaceId: string
@@ -99,8 +100,10 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
     } catch (err) {
       const apiError = err as ApiError
       console.error('🔴 Transform Error:', apiError)
-      setError(apiError.error + (apiError.detail ? `: ${apiError.detail}` : ''))
-      updateWorkspaceStatus(workspaceId, 'error')
+      const errorMessage = apiError.error || 'El agente no pudo procesar tu solicitud, trata de ser más específico'
+      setError(errorMessage + (apiError.detail ? `: ${apiError.detail}` : ''))
+      // Redirect to prompt page on transform failure
+      updateWorkspaceStatus(workspaceId, 'empty')
     } finally {
       setIsLoading(false)
     }
@@ -124,11 +127,11 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
               key={index}
               onClick={() => toggleSelection(index)}
               className={cn(
-                'p-6 bg-card border-2 rounded-lg transition-all text-left',
-                'hover:shadow-lg',
+                '!p-2 bg-card border-2 rounded-lg transition-all duration-200 text-left',
+                'hover:!bg-white/10 hover:!border-fuchsia-500/10',
                 selected.has(index)
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50 hover:bg-primary/5'
               )}
             >
               <div className="flex items-start justify-between mb-4">
@@ -174,9 +177,11 @@ export function SelectionView({ workspaceId }: SelectionViewProps) {
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error al transformar gráficas</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <div className="flex gap-4">

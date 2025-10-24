@@ -1,11 +1,14 @@
-import { useEffect } from 'react'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SiteHeader } from '@/components/site-header'
-import { WorkspaceContent } from '@/features/workspaces/components/WorkspaceContent'
+import { useEffect, Suspense, lazy } from 'react'
 import { validateEnv } from '@/lib/env'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { LoadingFallback } from '@/components/LoadingFallback'
+
+// Lazy load components for better performance
+const AppSidebar = lazy(() => import('@/components/app-sidebar').then(m => ({ default: m.AppSidebar })))
+const SiteHeader = lazy(() => import('@/components/site-header').then(m => ({ default: m.SiteHeader })))
+const WorkspaceContent = lazy(() => import('@/features/workspaces/components/WorkspaceContent').then(m => ({ default: m.WorkspaceContent })))
 
 function App() {
   useEffect(() => {
@@ -23,23 +26,25 @@ function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <TooltipProvider>
-        <SidebarProvider
-          className="h-screen"
-          style={
-            {
-              '--sidebar-width': 'calc(var(--spacing) * 72)',
-              '--header-height': 'calc(var(--spacing) * 12)',
-            } as React.CSSProperties
-          }
-        >
-          <AppSidebar />
-          <SidebarInset className="h-screen overflow-hidden">
-            <SiteHeader />
-            <div className="flex-1 min-h-0 !px-2 md:!px-4 !lg:px-16 md:!mb-16">
-              <WorkspaceContent />
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <SidebarProvider
+            className="h-screen"
+            style={
+              {
+                '--sidebar-width': 'calc(var(--spacing) * 72)',
+                '--header-height': 'calc(var(--spacing) * 12)',
+              } as React.CSSProperties
+            }
+          >
+            <AppSidebar />
+            <SidebarInset className="h-screen overflow-hidden">
+              <SiteHeader />
+              <div className="flex-1 min-h-0 px-2 md:px-4 lg:px-16 md:mb-16">
+                <WorkspaceContent />
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+        </Suspense>
       </TooltipProvider>
     </ThemeProvider>
   )

@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Upload, Sparkles, FileSpreadsheet } from 'lucide-react'
+import { Upload, Sparkles, FileSpreadsheet, AlertCircle } from 'lucide-react'
 import { useWorkspaceStore } from '../stores/useWorkspaceStore'
 import { ingestData } from '@/services/api'
 import type { ApiError } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
 
 interface PromptViewProps {
@@ -86,9 +87,18 @@ export function PromptView({ workspaceId }: PromptViewProps) {
 
     try {
       const response = await ingestData(message, file)
+      
+      // Check if agent failed to process the request
+      if (!response.chart_transform_request || response.chart_transform_request === null) {
+        const errorMessage = response.message || 'El agente no pudo procesar tu prompt, trata de ser más específico'
+        setError(errorMessage)
+        updateWorkspaceStatus(workspaceId, 'empty')
+        return
+      }
+      
       // Extract suggested charts and dataset from the nested structure
-      const suggestedCharts = response.chart_transform_request?.suggested_charts || []
-      const dataset = response.chart_transform_request?.dataset || []
+      const suggestedCharts = response.chart_transform_request.suggested_charts || []
+      const dataset = response.chart_transform_request.dataset || []
       setWorkspaceSession(workspaceId, response.session_id, dataset, suggestedCharts)
     } catch (err) {
       const apiError = err as ApiError
@@ -203,9 +213,11 @@ export function PromptView({ workspaceId }: PromptViewProps) {
 
             {/* Error Message */}
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
 
             {/* Submit Button */}
