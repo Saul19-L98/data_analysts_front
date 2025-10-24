@@ -26,15 +26,22 @@ export function PromptView({ workspaceId }: PromptViewProps) {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(true)
   }
 
-  const handleDragLeave = () => {
-    setIsDragging(false)
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Only reset if leaving the drop zone container itself
+    if (e.currentTarget === e.target) {
+      setIsDragging(false)
+    }
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(false)
 
     const files = e.dataTransfer.files
