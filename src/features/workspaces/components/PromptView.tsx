@@ -25,8 +25,8 @@ const MAX_DESCRIPTION_LENGTH = 500
  * Prompt view for file upload and AI analysis
  */
 export function PromptView({ workspaceId }: PromptViewProps) {
-  const { updateWorkspaceStatus, setWorkspaceSession, getWorkspace } = useWorkspaceStore()
-  const workspace = getWorkspace(workspaceId)
+  const { updateWorkspaceStatus, setWorkspaceSession } = useWorkspaceStore()
+  // const workspace = getWorkspace(workspaceId)
   const [message, setMessage] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -153,14 +153,14 @@ export function PromptView({ workspaceId }: PromptViewProps) {
     <div className="flex min-h-full items-center justify-center !p-6">
       <div className="w-full max-w-2xl space-y-8 animate-scale-in">
         {/* Workspace context banner */}
-        {workspace?.name && (
+        {/* {workspace?.name && (
           <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm px-5 py-4 text-center space-y-1">
             <h2 className="text-lg font-semibold text-foreground">{workspace.name}</h2>
             {workspace.description && (
               <p className="text-sm text-muted-foreground leading-relaxed">{workspace.description}</p>
             )}
           </div>
-        )}
+        )} */}
 
         {/* Header */}
         <div className="space-y-3 text-center">
@@ -177,7 +177,7 @@ export function PromptView({ workspaceId }: PromptViewProps) {
         </div>
 
         {/* Form */}
-        <Card className="border-border/60 bg-card p-8 shadow-xl ring-1 ring-border/30">
+        <Card className="border-border/60 bg-card !p-4 shadow-xl ring-1 ring-border/30">
           <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isLoading}>
             {/* Description Field */}
             <div className="space-y-2">
@@ -193,7 +193,7 @@ export function PromptView({ workspaceId }: PromptViewProps) {
                   disabled={isLoading}
                   maxLength={MAX_DESCRIPTION_LENGTH}
                   aria-describedby={error ? 'prompt-error' : undefined}
-                  className="min-h-[120px] resize-none bg-background text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary/20"
+                  className="!px-2  min-h-[120px] resize-none bg-background text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary/20"
                 />
                 <span
                   className="absolute bottom-2 right-3 text-xs text-muted-foreground/60 select-none"
