@@ -24,7 +24,7 @@ export function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild isActive={item.isActive}>
-                <a href={item.url}>
+                <a href={item.url} aria-current={item.isActive ? 'page' : undefined}>
                   <item.icon />
                   <span>{item.title}</span>
                 </a>

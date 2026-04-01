@@ -28,8 +28,10 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <LayoutDashboard className="!size-5" />
+              <a href="#" className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <LayoutDashboard className="!size-4" />
+                </div>
                 <span className="text-base font-semibold">Data Helper</span>
               </a>
             </SidebarMenuButton>

@@ -1,60 +1,27 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { ChartBuilt } from '@/types'
+import { CHART_PALETTE } from '../constants'
+import { useChartTheme } from '../hooks/useChartTheme'
+import { ChartEmptyState } from './ChartEmptyState'
+import { isPlaceholderData } from '../utils'
 
 interface PieVizProps {
   chart: ChartBuilt
 }
 
-const COLORS = [
-  '#8b5cf6',  // Purple
-  '#10b981',  // Green
-  '#f59e0b',  // Amber
-  '#ef4444',  // Red
-  '#3b82f6',  // Blue
-]
-
-/**
- * Pie chart visualization component
- */
 export function PieViz({ chart }: PieVizProps) {
   const { chart_data, x_axis_key, y_axis_keys } = chart
+  const theme = useChartTheme()
 
-  // Check if data is a placeholder/metadata structure
-  const hasPlaceholderData = chart_data.length > 0 && 'note' in chart_data[0] && chart_data[0].note === 'Data structure placeholder'
-
-  if (hasPlaceholderData || !chart_data || chart_data.length === 0) {
-    return (
-      <div className="h-[300px] w-full flex items-center justify-center border-2 border-dashed border-border rounded-lg">
-        <div className="text-center p-6">
-          <p className="text-lg font-semibold text-muted-foreground mb-2">
-            ⚠️ No hay datos para visualizar
-          </p>
-          <p className="text-sm text-muted-foreground max-w-md">
-            El backend retornó metadatos en lugar de datos reales. Verifica que el endpoint /charts/transform esté procesando correctamente el dataset.
-          </p>
-          {hasPlaceholderData && (
-            <details className="mt-4 text-left">
-              <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                Ver estructura recibida
-              </summary>
-              <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto max-h-32">
-                {JSON.stringify(chart_data[0], null, 2)}
-              </pre>
-            </details>
-          )}
-        </div>
-      </div>
-    )
+  if (isPlaceholderData(chart_data)) {
+    return <ChartEmptyState placeholderData={chart_data?.[0]} />
   }
 
-  // Determine the correct dataKey for the pie chart
-  // For pie charts, we want to use the first y_axis_key as the value
   const valueKey = y_axis_keys && y_axis_keys.length > 0 ? y_axis_keys[0] : 'value'
-  // Use x_axis_key for the name/label field
   const nameKey = x_axis_key || 'name'
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
           data={chart_data}
@@ -65,26 +32,17 @@ export function PieViz({ chart }: PieVizProps) {
             const percent = props.percent as number
             return `${props.name}: ${(percent * 100).toFixed(0)}%`
           }}
-          outerRadius={100}
+          outerRadius="75%"
           fill="#8884d8"
           dataKey={valueKey}
           nameKey={nameKey}
         >
           {chart_data.map((_entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-${index}`} fill={CHART_PALETTE[index % CHART_PALETTE.length]} />
           ))}
         </Pie>
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '6px',
-            color: '#fff',
-          }}
-          itemStyle={{ color: '#fff' }}
-          labelStyle={{ color: '#fff' }}
-        />
-        <Legend wrapperStyle={{ color: '#fff' }} />
+        <Tooltip contentStyle={theme.tooltipStyle} itemStyle={theme.tooltipItemStyle} labelStyle={theme.tooltipLabelStyle} />
+        <Legend wrapperStyle={{ color: theme.legendColor }} />
       </PieChart>
     </ResponsiveContainer>
   )

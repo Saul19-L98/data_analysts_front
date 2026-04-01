@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Upload, Sparkles, FileSpreadsheet, AlertCircle, X } from 'lucide-react'
 import { useWorkspaceStore } from '../stores/useWorkspaceStore'
 import { ingestData } from '@/services/api'
@@ -13,6 +13,14 @@ interface PromptViewProps {
   workspaceId: string
 }
 
+const LOADING_STEPS = [
+  'Subiendo archivo...',
+  'Analizando estructura de datos...',
+  'Generando sugerencias con IA...',
+]
+
+const MAX_DESCRIPTION_LENGTH = 500
+
 /**
  * Prompt view for file upload and AI analysis
  */
@@ -23,6 +31,21 @@ export function PromptView({ workspaceId }: PromptViewProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropZoneRef = useRef<HTMLDivElement>(null)
+
+  // Cycle through loading steps for UX feedback
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingStep(0)
+      return
+    }
+    const interval = setInterval(() => {
+      setLoadingStep((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev))
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [isLoading])
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -33,7 +56,6 @@ export function PromptView({ workspaceId }: PromptViewProps) {
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Only reset if leaving the drop zone container itself
     if (e.currentTarget === e.target) {
       setIsDragging(false)
     }
@@ -56,10 +78,16 @@ export function PromptView({ workspaceId }: PromptViewProps) {
     }
   }
 
+  const handleDropZoneKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      fileInputRef.current?.click()
+    }
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
-      // Validate file type
       const validTypes = [
         'text/csv',
         'application/vnd.ms-excel',
@@ -94,16 +122,14 @@ export function PromptView({ workspaceId }: PromptViewProps) {
 
     try {
       const response = await ingestData(message, file)
-      
-      // Check if agent failed to process the request
+
       if (!response.chart_transform_request || response.chart_transform_request === null) {
         const errorMessage = response.message || 'El agente no pudo procesar tu prompt, trata de ser más específico'
         setError(errorMessage)
         updateWorkspaceStatus(workspaceId, 'empty')
         return
       }
-      
-      // Extract suggested charts and dataset from the nested structure
+
       const suggestedCharts = response.chart_transform_request.suggested_charts || []
       const dataset = response.chart_transform_request.dataset || []
       setWorkspaceSession(workspaceId, response.session_id, dataset, suggestedCharts)
@@ -116,9 +142,15 @@ export function PromptView({ workspaceId }: PromptViewProps) {
     }
   }
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
   return (
     <div className="flex min-h-full items-center justify-center !p-6">
-      <div className="w-full max-w-2xl space-y-8">
+      <div className="w-full max-w-2xl space-y-8 animate-scale-in">
         {/* Header */}
         <div className="space-y-3 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
@@ -134,49 +166,78 @@ export function PromptView({ workspaceId }: PromptViewProps) {
         </div>
 
         {/* Form */}
-        <Card className="border-border bg-card p-8 shadow-lg">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <Card className="border-border/60 bg-card p-8 shadow-xl ring-1 ring-border/30">
+          <form onSubmit={handleSubmit} className="space-y-6" aria-busy={isLoading}>
             {/* Description Field */}
             <div className="space-y-2">
               <label htmlFor="description" className="text-sm font-medium text-card-foreground">
                 Descripción
               </label>
-              <Textarea
-                id="description"
-                placeholder="Describe tus datos o lo que quieres ver..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                disabled={isLoading}
-                className="min-h-[120px] resize-none bg-background text-foreground placeholder:text-muted-foreground"
-              />
+              <div className="relative">
+                <Textarea
+                  id="description"
+                  placeholder="Describe tus datos o lo que quieres ver..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
+                  disabled={isLoading}
+                  maxLength={MAX_DESCRIPTION_LENGTH}
+                  aria-describedby={error ? 'prompt-error' : undefined}
+                  className="min-h-[120px] resize-none bg-background text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary/20"
+                />
+                <span
+                  className="absolute bottom-2 right-3 text-xs text-muted-foreground/60 select-none"
+                  aria-hidden="true"
+                >
+                  {message.length}/{MAX_DESCRIPTION_LENGTH}
+                </span>
+              </div>
             </div>
 
             {/* File Upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-card-foreground">Archivo de datos</label>
               <div
+                ref={dropZoneRef}
+                role="button"
+                tabIndex={0}
+                aria-label="Seleccionar archivo CSV o XLSX para analizar"
+                aria-describedby={error ? 'prompt-error' : undefined}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onKeyDown={handleDropZoneKeyDown}
                 className={cn(
-                  "relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all",
+                  'relative flex min-h-[180px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all duration-200',
                   isDragging
-                    ? "border-primary bg-primary/5"
-                    : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50",
-                  isLoading && "cursor-not-allowed opacity-50"
+                    ? 'border-primary bg-primary/5 scale-[1.02]'
+                    : file
+                      ? 'border-primary/40 bg-primary/[0.03]'
+                      : 'border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40',
+                  isLoading && 'cursor-not-allowed opacity-60 pointer-events-none'
                 )}
               >
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".csv,.xlsx"
                   onChange={handleFileChange}
                   disabled={isLoading}
+                  aria-label="Seleccionar archivo CSV o XLSX"
                   className="absolute inset-0 cursor-pointer opacity-0"
+                  tabIndex={-1}
                 />
 
                 {file ? (
-                  <div className="relative flex flex-col items-center gap-3 text-center p-4">
-                    {/* X button in top right corner */}
+                  <div className="relative flex items-center gap-4 p-4 w-full max-w-sm">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                      <FileSpreadsheet className="h-7 w-7 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{file.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatFileSize(file.size)} &middot; {file.name.endsWith('.csv') ? 'CSV' : 'XLSX'}
+                      </p>
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -184,33 +245,23 @@ export function PromptView({ workspaceId }: PromptViewProps) {
                         setFile(null)
                       }}
                       disabled={isLoading}
-                      className="absolute top-2 right-2 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label="Eliminar archivo"
+                      className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Eliminar archivo seleccionado"
                     >
                       <X className="h-4 w-4" />
                     </button>
-
-                    <div className="rounded-full bg-primary/10 p-4">
-                      <FileSpreadsheet className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{file.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {(file.size / 1024).toFixed(2)} KB
-                      </p>
-                    </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center gap-3 text-center">
-                    <div className="rounded-full bg-muted p-4">
-                      <Upload className="h-8 w-8 text-muted-foreground" />
+                  <div className="flex flex-col items-center gap-3 text-center p-6">
+                    <div className="rounded-full bg-muted p-4 transition-colors group-hover:bg-primary/10">
+                      <Upload className="h-7 w-7 text-muted-foreground" />
                     </div>
                     <div>
                       <p className="font-medium text-foreground">
                         Selecciona un archivo CSV o XLSX
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        o arrastra y suelta aquí
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Arrastra y suelta, o presiona para seleccionar
                       </p>
                     </div>
                   </div>
@@ -221,11 +272,23 @@ export function PromptView({ workspaceId }: PromptViewProps) {
 
             {/* Error Message */}
             {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <div role="alert" aria-live="assertive">
+                <Alert variant="destructive" id="prompt-error" className="animate-fade-in-up">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            {/* Loading progress steps */}
+            {isLoading && (
+              <div className="flex items-center gap-3 rounded-lg bg-primary/5 border border-primary/20 p-4" aria-live="polite">
+                <div className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+                <span className="text-sm font-medium text-primary">
+                  {LOADING_STEPS[loadingStep]}
+                </span>
+              </div>
             )}
 
             {/* Submit Button */}
@@ -233,7 +296,7 @@ export function PromptView({ workspaceId }: PromptViewProps) {
               type="submit"
               size="lg"
               disabled={isLoading || !message.trim() || !file}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20 rounded-xl py-6 text-base cursor-pointer"
               aria-busy={isLoading}
             >
               {isLoading ? (

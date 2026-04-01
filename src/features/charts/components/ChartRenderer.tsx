@@ -34,7 +34,7 @@ export function ChartRenderer({ chart }: ChartRendererProps) {
   const ChartComponent = CHART_COMPONENTS[chart.chart_type] || LineViz
 
   return (
-    <div className="min-h-[300px] w-full">
+    <div className="h-full w-full">
       <ChartComponent chart={chart} />
     </div>
   )

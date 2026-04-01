@@ -26,22 +26,29 @@ function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <TooltipProvider>
+        <a href="#main-content" className="skip-to-content">
+          Saltar al contenido principal
+        </a>
         <Suspense fallback={<LoadingFallback />}>
           <SidebarProvider
             className="h-screen"
             style={
               {
                 '--sidebar-width': 'calc(var(--spacing) * 72)',
-                '--header-height': 'calc(var(--spacing) * 12)',
+                '--header-height': 'calc(var(--spacing) * 14)',
               } as React.CSSProperties
             }
           >
             <AppSidebar />
             <SidebarInset className="h-screen overflow-hidden">
               <SiteHeader />
-              <div className="flex-1 min-h-0 !px-2 md:!px-4 lg:!px-16">
+              <main
+                id="main-content"
+                tabIndex={-1}
+                className="flex-1 min-h-0 !px-2 md:!px-4 lg:!px-16 outline-none"
+              >
                 <WorkspaceContent />
-              </div>
+              </main>
             </SidebarInset>
           </SidebarProvider>
         </Suspense>

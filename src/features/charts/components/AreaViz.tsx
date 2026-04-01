@@ -1,59 +1,36 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { ChartBuilt } from '@/types'
+import { CHART_PALETTE } from '../constants'
+import { useChartTheme } from '../hooks/useChartTheme'
+import { ChartEmptyState } from './ChartEmptyState'
+import { isPlaceholderData } from '../utils'
 
 interface AreaVizProps {
   chart: ChartBuilt
 }
 
-/**
- * Area chart visualization component
- */
 export function AreaViz({ chart }: AreaVizProps) {
   const { chart_data, x_axis_key, y_axis_keys } = chart
+  const theme = useChartTheme()
 
-  // Use vibrant colors for better visibility in dark mode
-  const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']
+  if (isPlaceholderData(chart_data)) {
+    return <ChartEmptyState placeholderData={chart_data?.[0]} />
+  }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={chart_data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-        <XAxis
-          dataKey={x_axis_key || 'name'}
-          tick={{ fill: 'rgba(255,255,255,0.7)' }}
-          fontSize={12}
-        />
-        <YAxis tick={{ fill: 'rgba(255,255,255,0.7)' }} fontSize={12} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '6px',
-            color: '#fff',
-          }}
-          itemStyle={{ color: '#fff' }}
-          labelStyle={{ color: '#fff' }}
-        />
-        <Legend wrapperStyle={{ color: '#fff' }} />
+        <CartesianGrid strokeDasharray="3 3" stroke={theme.gridStroke} />
+        <XAxis dataKey={x_axis_key || 'name'} tick={{ fill: theme.tickFill }} fontSize={12} />
+        <YAxis tick={{ fill: theme.tickFill }} fontSize={12} />
+        <Tooltip contentStyle={theme.tooltipStyle} itemStyle={theme.tooltipItemStyle} labelStyle={theme.tooltipLabelStyle} />
+        <Legend wrapperStyle={{ color: theme.legendColor }} />
         {y_axis_keys && y_axis_keys.length > 0 ? (
           y_axis_keys.map((key, index) => (
-            <Area
-              key={key}
-              type="monotone"
-              dataKey={key}
-              stroke={colors[index % colors.length]}
-              fill={colors[index % colors.length]}
-              fillOpacity={0.6}
-            />
+            <Area key={key} type="monotone" dataKey={key} stroke={CHART_PALETTE[index % CHART_PALETTE.length]} fill={CHART_PALETTE[index % CHART_PALETTE.length]} fillOpacity={0.3} />
           ))
         ) : (
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke={colors[0]}
-            fill={colors[0]}
-            fillOpacity={0.6}
-          />
+          <Area type="monotone" dataKey="value" stroke={CHART_PALETTE[0]} fill={CHART_PALETTE[0]} fillOpacity={0.3} />
         )}
       </AreaChart>
     </ResponsiveContainer>
