@@ -120,7 +120,9 @@ export function NavWorkspaces() {
                       aria-current={activeWorkspaceId === workspace.id ? 'page' : undefined}
                       className={activeWorkspaceId === workspace.id ? 'relative before:absolute before:left-0 before:top-1/4 before:bottom-1/4 before:w-0.5 before:bg-primary before:rounded-full' : ''}
                     >
-                      <span className="truncate pr-10">{workspace.name}</span>
+                      <span className="truncate pr-10">
+                        {workspace.name || (workspace.status === 'setup' ? 'Nuevo workspace' : 'Sin nombre')}
+                      </span>
                     </SidebarMenuButton>
 
                     {/* Step 1: "Editar" trigger — visible on hover */}

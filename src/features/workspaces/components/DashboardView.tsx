@@ -86,6 +86,11 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
           <h2 className="text-3xl font-bold tracking-tight">
             {workspace?.name || 'Dashboard'}
           </h2>
+          {workspace?.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+              {workspace.description}
+            </p>
+          )}
           <p className="text-muted-foreground">
             Visualizando {charts.length} gráfica{charts.length !== 1 ? 's' : ''}
           </p>

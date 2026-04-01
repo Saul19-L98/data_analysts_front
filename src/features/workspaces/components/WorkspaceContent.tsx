@@ -1,4 +1,5 @@
 import { useWorkspaceStore } from '../stores/useWorkspaceStore'
+import { SetupView } from './SetupView'
 import { PromptView } from './PromptView'
 import { SelectionView } from './SelectionView'
 import { DashboardView } from './DashboardView'
@@ -145,6 +146,9 @@ export function WorkspaceContent() {
 
   // Render view based on workspace status
   switch (workspace.status) {
+    case 'setup':
+      return <SetupView workspaceId={workspace.id} />
+
     case 'empty':
     case 'prompted':
     case 'error':

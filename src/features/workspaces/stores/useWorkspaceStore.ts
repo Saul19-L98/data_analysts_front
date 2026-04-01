@@ -16,6 +16,7 @@ interface WorkspaceState {
  */
 interface WorkspaceActions {
   addWorkspace: () => string
+  setupWorkspace: (id: string, name: string, description: string) => void
   removeWorkspace: (id: string) => void
   renameWorkspace: (id: string, name: string) => void
   setActiveWorkspace: (id: string | null) => void
@@ -46,11 +47,10 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
 
       addWorkspace: () => {
         const id = generateId()
-        const workspaceCount = get().workspaces.length + 1
         const newWorkspace: Workspace = {
           id,
-          name: `Workspace ${workspaceCount}`,
-          status: 'empty',
+          name: '',
+          status: 'setup',
           createdAt: Date.now(),
           updatedAt: Date.now(),
         }
@@ -61,6 +61,16 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         }))
 
         return id
+      },
+
+      setupWorkspace: (id: string, name: string, description: string) => {
+        set((state) => ({
+          workspaces: state.workspaces.map((w) =>
+            w.id === id
+              ? { ...w, name, description, status: 'empty' as WorkspaceStatus, updatedAt: Date.now() }
+              : w
+          ),
+        }))
       },
 
       removeWorkspace: (id: string) => {

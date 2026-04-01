@@ -25,7 +25,8 @@ const MAX_DESCRIPTION_LENGTH = 500
  * Prompt view for file upload and AI analysis
  */
 export function PromptView({ workspaceId }: PromptViewProps) {
-  const { updateWorkspaceStatus, setWorkspaceSession } = useWorkspaceStore()
+  const { updateWorkspaceStatus, setWorkspaceSession, getWorkspace } = useWorkspaceStore()
+  const workspace = getWorkspace(workspaceId)
   const [message, setMessage] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -151,6 +152,16 @@ export function PromptView({ workspaceId }: PromptViewProps) {
   return (
     <div className="flex min-h-full items-center justify-center !p-6">
       <div className="w-full max-w-2xl space-y-8 animate-scale-in">
+        {/* Workspace context banner */}
+        {workspace?.name && (
+          <div className="rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm px-5 py-4 text-center space-y-1">
+            <h2 className="text-lg font-semibold text-foreground">{workspace.name}</h2>
+            {workspace.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed">{workspace.description}</p>
+            )}
+          </div>
+        )}
+
         {/* Header */}
         <div className="space-y-3 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">

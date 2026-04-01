@@ -22,6 +22,7 @@ export type Priority = 'low' | 'medium' | 'high'
  * Workspace status throughout the workflow
  */
 export type WorkspaceStatus =
+  | 'setup'
   | 'empty'
   | 'prompted'
   | 'selecting'
@@ -60,6 +61,7 @@ export interface ChartBuilt {
 export interface Workspace {
   id: string
   name: string
+  description?: string
   status: WorkspaceStatus
   sessionId?: string
   dataset?: Record<string, unknown>[]
