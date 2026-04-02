@@ -79,7 +79,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden animate-fade-in-up">
+    <div className="flex flex-col h-full overflow-hidden animate-fade-in-up py-4">
       {/* Fixed Header Section */}
       <div className="shrink-0 space-y-6 md:space-y-8 py-6 md:py-8 px-4 md:px-6 lg:px-8">
         <div className="flex flex-col gap-2 !my-4">
@@ -106,7 +106,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
       </div>
 
       {/* Scrollable Charts Section */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 lg:px-8 pb-6">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 lg:px-8 !pb-6">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {charts.map((chart, index) => {
             const compact = isCompactChart(chart.chart_type)
@@ -162,7 +162,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-center gap-2 group">
+                          <div className="flex items-center gap-2 group !px-4">
                             <CardTitle className="text-xl line-clamp-1">{chart.title}</CardTitle>
                             <Button
                               onClick={() => handleEditStart(chart)}
@@ -175,7 +175,7 @@ export function DashboardView({ workspaceId }: { workspaceId: string }) {
                             </Button>
                           </div>
                           {chart.description && (
-                            <CardDescription className="line-clamp-2">
+                            <CardDescription className="line-clamp-2 !px-4">
                               {chart.description}
                             </CardDescription>
                           )}
