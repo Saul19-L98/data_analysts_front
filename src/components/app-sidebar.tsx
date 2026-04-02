@@ -4,6 +4,7 @@ import { NavWorkspaces } from '@/components/nav-workspaces'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -42,6 +43,19 @@ export function AppSidebar() {
         <NavMain items={data.navMain} />
         <NavWorkspaces />
       </SidebarContent>
+      <SidebarFooter>
+        <p className="text-xs text-muted-foreground text-center leading-relaxed">
+          Hecho con ❤️ por{' '}
+          <a
+            href="https://github.com/Saul19-L98/data_analysts_front"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground hover:underline"
+          >
+            Sallanez
+          </a>
+        </p>
+      </SidebarFooter>
     </Sidebar>
   )
 }
